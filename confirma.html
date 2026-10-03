@@ -54,25 +54,12 @@
 
         .card {
             width: 100%;
-            max-width: 750px;
+            max-width: 420px;
             background: rgba(30, 20, 50, 0.7);
             border: 1px solid rgba(255,140,0,0.12);
             border-radius: 24px;
             padding: 2rem;
             backdrop-filter: blur(20px);
-        }
-        
-        .card-columns {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 2rem;
-        }
-        
-        @media (min-width: 650px) {
-            .card-columns {
-                grid-template-columns: 1.2fr 1fr;
-                align-items: start;
-            }
         }
 
         /* Back link */
@@ -260,9 +247,7 @@
 
         <h2 class="rsvp-title">🎃 Confirma Prezenta</h2>
 
-        <div class="card-columns">
-            <div class="left-col">
-                <form id="form">
+        <form id="form">
             <div class="field">
                 <label>Numele tău</label>
                 <input type="text" id="name" placeholder="Cum te cheamă?" required>
@@ -294,17 +279,17 @@
             <p id="doneText">Răspunsul tău a fost salvat.</p>
             <a href="./">← Înapoi la invitație</a>
         </div>
-        </div> <!-- End left-col -->
 
-        <div class="right-col">
-        <div class="guests">
+        <div class="toggle-container" style="text-align: center; margin-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 1.2rem;">
+            <button type="button" id="toggleBtn" style="background: none; border: 1px solid rgba(255,140,0,0.3); color: #ffb347; padding: 0.6rem 1.2rem; border-radius: 20px; font-size: 0.8rem; cursor: pointer; transition: all 0.2s;">👀 Vezi cine mai vine</button>
+        </div>
+
+        <div class="guests" id="guestsBlock" style="display: none;">
             <div class="gt">Răspunsuri</div>
             <div id="gList">
                 <div class="ge" id="gE">Fii primul care răspunde 🦇</div>
             </div>
         </div>
-        </div> <!-- End right-col -->
-        </div> <!-- End card-columns -->
     </div>
 </div>
 
@@ -442,6 +427,21 @@
 
     function esc(s) { const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
     
+    // Toggle Guests List
+    const toggleBtn = document.getElementById('toggleBtn');
+    const guestsBlock = document.getElementById('guestsBlock');
+    toggleBtn.addEventListener('click', () => {
+        if (guestsBlock.style.display === 'none') {
+            guestsBlock.style.display = 'block';
+            toggleBtn.textContent = '🙈 Ascunde lista';
+            // Scroll to bottom smoothly so they see the list
+            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        } else {
+            guestsBlock.style.display = 'none';
+            toggleBtn.textContent = '👀 Vezi cine mai vine';
+        }
+    });
+
     // Initial load
     loadData();
 </script>
