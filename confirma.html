@@ -221,6 +221,38 @@
 
         .ge { text-align: center; font-size: 0.78rem; color: rgba(237,230,245,0.2); padding: 0.3rem 0; }
 
+        /* Modal Overlay */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(5px);
+            z-index: 999;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        .modal-content {
+            background: rgba(30, 20, 50, 0.95);
+            border: 1px solid rgba(255,140,0,0.3);
+            border-radius: 20px;
+            width: 100%;
+            max-width: 420px;
+            padding: 2rem;
+            position: relative;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .close-btn {
+            position: absolute;
+            top: 15px; right: 20px;
+            background: none; border: none;
+            color: #ffb347; font-size: 1.5rem;
+            cursor: pointer;
+        }
+
         @media (max-height: 620px) {
             .card { padding: 1.3rem; }
             .rsvp-title { font-size: 1.5rem; margin-bottom: 1rem; }
@@ -284,10 +316,15 @@
             <button type="button" id="toggleBtn" style="background: none; border: 1px solid rgba(255,140,0,0.3); color: #ffb347; padding: 0.6rem 1.2rem; border-radius: 20px; font-size: 0.8rem; cursor: pointer; transition: all 0.2s;">👀 Vezi cine mai vine</button>
         </div>
 
-        <div class="guests" id="guestsBlock" style="display: none;">
-            <div class="gt">Răspunsuri</div>
-            <div id="gList">
-                <div class="ge" id="gE">Fii primul care răspunde 🦇</div>
+        <div id="guestsOverlay" class="modal-overlay">
+            <div class="modal-content">
+                <button type="button" id="closeModalBtn" class="close-btn">&times;</button>
+                <div class="guests" id="guestsBlock" style="margin-top: 0; border-top: none; padding-top: 0;">
+                    <div class="gt">Răspunsuri</div>
+                    <div id="gList">
+                        <div class="ge" id="gE">Fii primul care răspunde 🦇</div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -417,29 +454,31 @@
         list.querySelectorAll('.gi').forEach(x=>x.remove());
 
         const lab = { yes:'vine 🎉', maybe:'poate 🤔', no:'nu poate 😢' };
-        currentData.forEach(g => {
+        currentData.forEach((g, index) => {
             const d = document.createElement('div');
             d.classList.add('gi');
-            d.innerHTML = `<span>${esc(g.name)}</span><span class="gb ${g.response}">${lab[g.response]}</span>`;
+            d.innerHTML = `<span><strong style="color: rgba(255,179,71,0.7);">${index + 1}.</strong> ${esc(g.name)}</span><span class="gb ${g.response}">${lab[g.response]}</span>`;
             list.appendChild(d);
         });
     }
 
     function esc(s) { const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
     
-    // Toggle Guests List
+    // Toggle Guests Modal
     const toggleBtn = document.getElementById('toggleBtn');
-    const guestsBlock = document.getElementById('guestsBlock');
+    const guestsOverlay = document.getElementById('guestsOverlay');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+
     toggleBtn.addEventListener('click', () => {
-        if (guestsBlock.style.display === 'none') {
-            guestsBlock.style.display = 'block';
-            toggleBtn.textContent = '🙈 Ascunde lista';
-            // Scroll to bottom smoothly so they see the list
-            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-        } else {
-            guestsBlock.style.display = 'none';
-            toggleBtn.textContent = '👀 Vezi cine mai vine';
-        }
+        guestsOverlay.style.display = 'flex';
+    });
+
+    closeModalBtn.addEventListener('click', () => {
+        guestsOverlay.style.display = 'none';
+    });
+
+    guestsOverlay.addEventListener('click', (e) => {
+        if (e.target === guestsOverlay) guestsOverlay.style.display = 'none';
     });
 
     // Initial load
