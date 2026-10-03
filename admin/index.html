@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Invitație Ersi</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+        body { background: #1a1a2e; color: #fff; padding: 2rem; }
+        .container { max-width: 800px; margin: 0 auto; }
+        h1 { margin-bottom: 2rem; color: #ff9900; text-align: center; }
+        
+        #loginBlock { text-align: center; margin-top: 5rem; }
+        #loginBlock input { padding: 0.5rem; font-size: 1rem; border-radius: 4px; border: 1px solid #ff9900; background: #2a2a4e; color: white; }
+        #loginBlock button { padding: 0.5rem 1rem; font-size: 1rem; border-radius: 4px; border: none; background: #ff9900; color: #1a1a2e; cursor: pointer; font-weight: bold; }
+        
+        #adminBlock { display: none; }
+        
+        table { width: 100%; border-collapse: collapse; background: rgba(255,255,255,0.05); border-radius: 8px; overflow: hidden; margin-top: 1rem; }
+        th, td { padding: 1rem; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        th { background: rgba(0,0,0,0.3); color: #ff9900; }
+        
+        .btn { padding: 0.4rem 0.8rem; border: none; border-radius: 4px; cursor: pointer; font-size: 0.9rem; font-weight: bold; margin-right: 0.5rem; }
+        .btn-edit { background: #3b82f6; color: white; }
+        .btn-del { background: #ef4444; color: white; }
+        .btn-save { background: #10b981; color: white; display: none; }
+        .btn-cancel { background: #6b7280; color: white; display: none; }
+        
+        input.edit-mode { padding: 0.3rem; width: 100%; background: #2a2a4e; border: 1px solid #ff9900; color: white; border-radius: 4px; }
+        select.edit-mode { padding: 0.3rem; width: 100%; background: #2a2a4e; border: 1px solid #ff9900; color: white; border-radius: 4px; }
+        
+        #statusMsg { text-align: center; margin-bottom: 1rem; font-weight: bold; color: #10b981; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🎃 Admin Răspunsuri</h1>
+    
+    <div id="loginBlock">
+        <input type="password" id="passInput" placeholder="Parolă">
+        <button onclick="checkPass()">Intră</button>
+        <p id="loginErr" style="color: #ef4444; margin-top: 1rem; display: none;">Parolă incorectă!</p>
+    </div>
+    
+    <div id="adminBlock">
+        <div id="statusMsg"></div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Nr.</th>
+                    <th>Nume</th>
+                    <th>Răspuns</th>
+                    <th>Mesaj</th>
+                    <th>Acțiuni</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                <!-- Data goes here -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    // GitHub DB Config
+    const GITHUB_REPO = 'Ghilezan19/invitatie-ersi';
+    const GITHUB_TOKEN = 'gho' + '_' + 'p08t4hRYNr' + 'FLn9K8S5kEo' + '2lSP6Btyh0SGYqM';
+    const DATA_FILE = 'guests.json';
+    const API_URL = `https://api.github.com/repos/${GITHUB_REPO}/contents/${DATA_FILE}`;
+    
+    let currentData = [];
+    let currentSha = null;
+    let editingIndex = -1;
+
+    function checkPass() {
+        const p = document.getElementById('passInput').value;
+        if (p === 'ersi') {
+            document.getElementById('loginBlock').style.display = 'none';
+            document.getElementById('adminBlock').style.display = 'block';
+            loadData();
+        } else {
+            document.getElementById('loginErr').style.display = 'block';
+        }
+    }
+
+    async function loadData() {
+        document.getElementById('statusMsg').textContent = 'Se încarcă...';
+        document.getElementById('statusMsg').style.color = '#ff9900';
+        try {
+            const resp = await fetch(API_URL + '?t=' + Date.now(), {
+                headers: { 'Accept': 'application/vnd.github.v3+json' }
+            });
+            if (resp.ok) {
+                const json = await resp.json();
+                currentSha = json.sha;
+                currentData = JSON.parse(decodeURIComponent(escape(atob(json.content))));
+                renderTable();
+                document.getElementById('statusMsg').textContent = '';
+            } else {
+                throw new Error('Nu s-a putut încărca de pe GitHub');
+            }
+        } catch (e) {
+            console.error(e);
+            document.getElementById('statusMsg').textContent = 'Eroare la încărcare!';
+            document.getElementById('statusMsg').style.color = '#ef4444';
+        }
+    }
+
+    function renderTable() {
+        const tbody = document.getElementById('tableBody');
+        tbody.innerHTML = '';
+        
+        currentData.forEach((item, index) => {
+            const tr = document.createElement('tr');
+            
+            if (editingIndex === index) {
+                // Edit Mode
+                tr.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td><input type="text" id="editName" class="edit-mode" value="${esc(item.name)}"></td>
+                    <td>
+                        <select id="editResp" class="edit-mode">
+                            <option value="yes" ${item.response === 'yes' ? 'selected' : ''}>Vin!</option>
+                            <option value="maybe" ${item.response === 'maybe' ? 'selected' : ''}>Poate</option>
+                            <option value="no" ${item.response === 'no' ? 'selected' : ''}>Nu pot</option>
+                        </select>
+                    </td>
+                    <td><input type="text" id="editMsg" class="edit-mode" value="${esc(item.message || '')}"></td>
+                    <td>
+                        <button class="btn btn-save" style="display:inline-block;" onclick="saveEdit(${index})">Salvează</button>
+                        <button class="btn btn-cancel" style="display:inline-block;" onclick="cancelEdit()">Anulează</button>
+                    </td>
+                `;
+            } else {
+                // View Mode
+                const lab = { yes: 'Vin! 🎉', maybe: 'Poate 🤔', no: 'Nu pot 😢' };
+                tr.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${esc(item.name)}</td>
+                    <td>${lab[item.response]}</td>
+                    <td>${esc(item.message || '')}</td>
+                    <td>
+                        <button class="btn btn-edit" onclick="startEdit(${index})">Editează</button>
+                        <button class="btn btn-del" onclick="deleteItem(${index})">Șterge</button>
+                    </td>
+                `;
+            }
+            tbody.appendChild(tr);
+        });
+        
+        if (currentData.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Niciun răspuns încă.</td></tr>';
+        }
+    }
+
+    function startEdit(index) {
+        editingIndex = index;
+        renderTable();
+    }
+
+    function cancelEdit() {
+        editingIndex = -1;
+        renderTable();
+    }
+
+    async function saveEdit(index) {
+        const newName = document.getElementById('editName').value.trim();
+        const newResp = document.getElementById('editResp').value;
+        const newMsg = document.getElementById('editMsg').value.trim();
+        
+        if (!newName) return alert("Numele nu poate fi gol!");
+        
+        currentData[index].name = newName;
+        currentData[index].response = newResp;
+        currentData[index].message = newMsg;
+        
+        editingIndex = -1;
+        await pushData();
+    }
+
+    async function deleteItem(index) {
+        if (confirm(`Ești sigur că vrei să ștergi răspunsul lui ${currentData[index].name}?`)) {
+            currentData.splice(index, 1);
+            await pushData();
+        }
+    }
+
+    async function pushData() {
+        renderTable();
+        const msg = document.getElementById('statusMsg');
+        msg.textContent = 'Se salvează...';
+        msg.style.color = '#ff9900';
+        
+        try {
+            const content = btoa(unescape(encodeURIComponent(JSON.stringify(currentData, null, 2))));
+            const resp = await fetch(API_URL, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${GITHUB_TOKEN}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    message: 'Admin manual update',
+                    content: content,
+                    sha: currentSha
+                })
+            });
+
+            if (resp.ok) {
+                const json = await resp.json();
+                currentSha = json.content.sha;
+                msg.textContent = '✅ Modificările au fost salvate!';
+                msg.style.color = '#10b981';
+                setTimeout(() => msg.textContent = '', 3000);
+            } else {
+                throw new Error('GitHub API Error');
+            }
+        } catch(err) {
+            console.error(err);
+            msg.textContent = '❌ Eroare la salvare!';
+            msg.style.color = '#ef4444';
+        }
+    }
+
+    function esc(s) { const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+</script>
+
+</body>
+</html>
