@@ -90,7 +90,10 @@
         document.getElementById('statusMsg').style.color = '#ff9900';
         try {
             const resp = await fetch(API_URL + '?t=' + Date.now(), {
-                headers: { 'Accept': 'application/vnd.github.v3+json' }
+                headers: { 
+                    'Accept': 'application/vnd.github.v3+json',
+                    'Authorization': `Bearer ${GITHUB_TOKEN}`
+                }
             });
             if (resp.ok) {
                 const json = await resp.json();
