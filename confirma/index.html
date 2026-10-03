@@ -396,12 +396,22 @@
             message: document.getElementById('msg').value.trim(), 
             time: new Date().toISOString() 
         };
-        currentData.push(newEntry);
-
         try {
-            // Save to GitHub
-            const content = btoa(unescape(encodeURIComponent(JSON.stringify(currentData, null, 2))));
-            const resp = await fetch(API_URL, {
+            // 1. Fetch the latest data to prevent 409 Conflict
+            const getResp = await fetch(API_URL + '?t=' + Date.now(), {
+                headers: { 'Accept': 'application/vnd.github.v3+json' }
+            });
+            if (!getResp.ok) throw new Error('Nu s-a putut citi baza de date.');
+            const getJson = await getResp.json();
+            const latestSha = getJson.sha;
+            const latestData = JSON.parse(decodeURIComponent(escape(atob(getJson.content))));
+
+            // 2. Add the new entry to the latest data
+            latestData.push(newEntry);
+
+            // 3. Save back to GitHub
+            const content = btoa(unescape(encodeURIComponent(JSON.stringify(latestData, null, 2))));
+            const putResp = await fetch(API_URL, {
                 method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${GITHUB_TOKEN}`,
@@ -410,17 +420,22 @@
                 body: JSON.stringify({
                     message: 'New RSVP from ' + newEntry.name,
                     content: content,
-                    sha: currentSha
+                    sha: latestSha
                 })
             });
 
-            if (!resp.ok) throw new Error('Nu s-a putut salva pe GitHub');
+            if (!putResp.ok) {
+                console.error(await putResp.text());
+                throw new Error('Eroare la scriere pe server.');
+            }
+
+            // Update local state for rendering
+            currentData = latestData;
         } catch(err) {
             console.error(err);
-            alert('A apărut o eroare la salvare. Incearcă din nou!');
+            alert('A apărut o eroare de sincronizare. Te rugăm să apeși pe Trimite din nou (acum va funcționa)!');
             btn.disabled = false;
             btn.textContent = 'Trimite';
-            currentData.pop(); // Revert
             return;
         }
 
