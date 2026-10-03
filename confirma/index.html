@@ -114,7 +114,7 @@
 
         .responses { display: flex; gap: 0.6rem; }
 
-        .resp {
+        .resp, .transp {
             flex: 1;
             padding: 0.75rem 0.4rem;
             border: 1.5px solid rgba(255,255,255,0.07);
@@ -129,11 +129,13 @@
             text-align: center;
         }
 
-        .resp .re { display: block; font-size: 1.3rem; margin-bottom: 0.2rem; }
-        .resp:hover { background: rgba(255,255,255,0.04); }
+        .resp .re, .transp .re { display: block; font-size: 1.3rem; margin-bottom: 0.2rem; }
+        .resp:hover, .transp:hover { background: rgba(255,255,255,0.04); }
         .resp[data-r="yes"].on { border-color: #4ade80; background: rgba(74,222,128,0.1); }
         .resp[data-r="maybe"].on { border-color: #fbbf24; background: rgba(251,191,36,0.1); }
         .resp[data-r="no"].on { border-color: #f87171; background: rgba(248,113,113,0.1); }
+        .transp[data-t="yes"].on { border-color: #4ade80; background: rgba(74,222,128,0.1); }
+        .transp[data-t="no"].on { border-color: #60a5fa; background: rgba(96,165,250,0.1); }
 
         .send {
             width: 100%;
@@ -298,6 +300,18 @@
             </div>
 
             <div class="field">
+                <label>Ai nevoie de transport?</label>
+                <div class="responses">
+                    <button type="button" class="transp" data-t="yes">
+                        <span class="re">🚌</span> Da, am nevoie
+                    </button>
+                    <button type="button" class="transp" data-t="no">
+                        <span class="re">🚗</span> Mă descurc
+                    </button>
+                </div>
+            </div>
+
+            <div class="field">
                 <label>Mesaj (opțional)</label>
                 <textarea id="msg" placeholder="Ceva de adăugat?"></textarea>
             </div>
@@ -354,6 +368,7 @@
 
     // RSVP
     let pick = null;
+    let tpick = null;
     let currentData = [];
     let currentSha = null;
 
@@ -366,13 +381,22 @@
         });
     });
 
+    document.querySelectorAll('.transp').forEach(b => {
+        b.addEventListener('click', () => {
+            document.querySelectorAll('.transp').forEach(x => x.classList.remove('on'));
+            b.classList.add('on');
+            tpick = b.dataset.t;
+            chk();
+        });
+    });
+
     const nm = document.getElementById('name');
     nm.addEventListener('input', chk);
-    function chk() { document.getElementById('sendBtn').disabled = !(nm.value.trim() && pick); }
+    function chk() { document.getElementById('sendBtn').disabled = !(nm.value.trim() && pick && tpick); }
 
     document.getElementById('form').addEventListener('submit', async e => {
         e.preventDefault();
-        if (!nm.value.trim() || !pick) return;
+        if (!nm.value.trim() || !pick || !tpick) return;
 
         const btn = document.getElementById('sendBtn');
         btn.disabled = true;
@@ -382,6 +406,7 @@
         const newEntry = { 
             name: nm.value.trim(), 
             response: pick, 
+            transport: tpick,
             message: document.getElementById('msg').value.trim(), 
             time: new Date().toISOString() 
         };
