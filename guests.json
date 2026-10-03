@@ -40,5 +40,12 @@
     "transport": "no",
     "message": "Eu pot veni cu masina si sa iau alte persoane daca este nevoie",
     "time": "2026-10-03T17:41:43.917Z"
+  },
+  {
+    "name": "Lia",
+    "response": "no",
+    "transport": "yes",
+    "message": "",
+    "time": "2026-10-03T17:44:00.450Z"
   }
 ]
