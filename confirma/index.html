@@ -58,7 +58,7 @@
             background: rgba(30, 20, 50, 0.7);
             border: 1px solid rgba(255,140,0,0.12);
             border-radius: 24px;
-            padding: 2rem;
+            padding: 1.5rem;
             backdrop-filter: blur(20px);
         }
 
@@ -80,10 +80,10 @@
             font-size: 1.8rem;
             color: #ff8c00;
             text-align: center;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1.2rem;
         }
 
-        .field { margin-bottom: 1rem; }
+        .field { margin-bottom: 0.8rem; }
 
         .field label {
             display: block;
@@ -97,7 +97,7 @@
 
         .field input, .field textarea {
             width: 100%;
-            padding: 0.7rem 1rem;
+            padding: 0.6rem 0.8rem;
             background: rgba(255,255,255,0.04);
             border: 1px solid rgba(255,140,0,0.12);
             border-radius: 10px;
@@ -109,14 +109,14 @@
         }
 
         .field input:focus, .field textarea:focus { border-color: rgba(255,140,0,0.4); }
-        .field textarea { resize: none; height: 55px; }
+        .field textarea { resize: none; height: 45px; }
         .field input::placeholder, .field textarea::placeholder { color: rgba(237,230,245,0.2); }
 
         .responses { display: flex; gap: 0.6rem; }
 
         .resp, .transp {
             flex: 1;
-            padding: 0.75rem 0.4rem;
+            padding: 0.5rem 0.4rem;
             border: 1.5px solid rgba(255,255,255,0.07);
             border-radius: 12px;
             background: transparent;
@@ -256,16 +256,10 @@
         }
 
         @media (max-height: 620px) {
-            .card { padding: 1.3rem; }
-            .rsvp-title { font-size: 1.5rem; margin-bottom: 1rem; }
-            .field { margin-bottom: 0.7rem; }
+            .card { padding: 1.2rem; }
+            .rsvp-title { font-size: 1.4rem; margin-bottom: 0.8rem; }
+            .field { margin-bottom: 0.6rem; }
             .field textarea { height: 40px; }
-        }
-
-        @media (max-width: 480px) {
-            .responses { flex-direction: column; gap: 0.4rem; }
-            .resp { flex-direction: row; display: flex; align-items: center; gap: 0.5rem; padding: 0.6rem 1rem; }
-            .resp .re { display: inline; margin-bottom: 0; }
         }
     </style>
 </head>
