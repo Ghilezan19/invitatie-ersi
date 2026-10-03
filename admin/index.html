@@ -51,6 +51,7 @@
                     <th>Nr.</th>
                     <th>Nume</th>
                     <th>Răspuns</th>
+                    <th>Transport</th>
                     <th>Mesaj</th>
                     <th>Acțiuni</th>
                 </tr>
@@ -126,6 +127,13 @@
                             <option value="no" ${item.response === 'no' ? 'selected' : ''}>Nu pot</option>
                         </select>
                     </td>
+                    <td>
+                        <select id="editTransp" class="edit-mode">
+                            <option value="" ${!item.transport ? 'selected' : ''}>—</option>
+                            <option value="yes" ${item.transport === 'yes' ? 'selected' : ''}>🚌 Am nevoie</option>
+                            <option value="no" ${item.transport === 'no' ? 'selected' : ''}>🚗 Mă descurc</option>
+                        </select>
+                    </td>
                     <td><input type="text" id="editMsg" class="edit-mode" value="${esc(item.message || '')}"></td>
                     <td>
                         <button class="btn btn-save" style="display:inline-block;" onclick="saveEdit(${index})">Salvează</button>
@@ -135,10 +143,12 @@
             } else {
                 // View Mode
                 const lab = { yes: 'Vin! 🎉', maybe: 'Poate 🤔', no: 'Nu pot 😢' };
+                const tLab = { yes: '🚌 Am nevoie', no: '🚗 Mă descurc' };
                 tr.innerHTML = `
                     <td>${index + 1}</td>
                     <td>${esc(item.name)}</td>
                     <td>${lab[item.response]}</td>
+                    <td>${item.transport ? tLab[item.transport] || '—' : '—'}</td>
                     <td>${esc(item.message || '')}</td>
                     <td>
                         <button class="btn btn-edit" onclick="startEdit(${index})">Editează</button>
@@ -167,12 +177,14 @@
     async function saveEdit(index) {
         const newName = document.getElementById('editName').value.trim();
         const newResp = document.getElementById('editResp').value;
+        const newTransp = document.getElementById('editTransp').value;
         const newMsg = document.getElementById('editMsg').value.trim();
         
         if (!newName) return alert("Numele nu poate fi gol!");
         
         currentData[index].name = newName;
         currentData[index].response = newResp;
+        currentData[index].transport = newTransp;
         currentData[index].message = newMsg;
         
         editingIndex = -1;
