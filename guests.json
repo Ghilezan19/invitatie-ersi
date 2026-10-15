@@ -68,5 +68,12 @@
     "transport": "no",
     "message": "lma",
     "time": "2026-10-15T18:47:52.240Z"
+  },
+  {
+    "name": "Rares",
+    "response": "yes",
+    "transport": "no",
+    "message": "",
+    "time": "2026-10-15T18:48:57.675Z"
   }
 ]
