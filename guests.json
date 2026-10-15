@@ -1,12 +1,5 @@
 [
   {
-    "name": "Carmina",
-    "response": "yes",
-    "transport": "yes",
-    "message": "",
-    "time": "2026-10-03T17:08:40.167Z"
-  },
-  {
     "name": "Ada",
     "response": "yes",
     "transport": "no",
